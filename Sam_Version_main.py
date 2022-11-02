@@ -2,7 +2,7 @@ import os
 from typing import Callable
 import numpy as np
 import string
-
+import sys
 def FindMostSimilarSeq(t : str, D : dict, algo : Callable) -> tuple[str, int]:
     bestSim = -10e-10
     bestSeq = ""
@@ -170,6 +170,18 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
         elif(algo_choice == 2):
+            curr_longest = [pow(2,31), None]
+            for i in D:
+                hold = EditDistance(D[i], query_sequence)
+                print("Comparing Edit Distance for String 1: " + i + " to String 2: Query Sequence")
+                print("Edit Distance is: ", hold)
+                print(curr_longest[0])
+                if(hold < curr_longest[0]):
+                    
+                    curr_longest[0] = hold
+                    curr_longest[1] = i
+            print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
+            #LongestCommonSubstring
             #EditDistance
             pass
         elif(algo_choice == 3):
