@@ -160,7 +160,7 @@ if __name__ == "__main__":
         query_sequence = readQuerySequence(query_filename)
         if(query_sequence != None):
             break
-        query_filename= input("Provide a file with a valid query sequence:")
+        query_filename= input("Provide a file with a valid query sequence: ")
         
     flag = True
     while(flag == True):
