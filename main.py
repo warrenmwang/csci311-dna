@@ -90,6 +90,32 @@ def Needleman_Wunsch(s : str, t : str):
                 d[i][j] = maxpoint
     return int(d[m][n])
 
+
+def SmithWaterman(s : str, t : str, match = 2, mismatch = -2, gap = -1) -> int:
+    dp_matrix = np.zeros((len(s)+1, len(t)+1))
+    
+    max_val = -1
+
+    for i in range(1, len(s)):
+        for j in range(1, len(t)):
+
+            vertical_value = dp_matrix[i-1,j] + gap
+
+            horizontal_value = dp_matrix[i,j-1] + gap
+
+            # s[i-1] is checked with t[j-1] because our indexing in the dp_matrix starts at 1 but the actual string indexing starts at 0. 
+            if  s[i-1] == t[j-1]:  
+                diagonal_value = dp_matrix[i-1,j-1] + match
+            else:
+                diagonal_value = dp_matrix[i-1,j-1] + mismatch    
+
+            #if score is negative, replace it with a zero.     
+            dp_matrix[i,j] = max(0, diagonal_value, vertical_value, horizontal_value)
+
+            max_val = max(max_val, dp_matrix[i,j])
+    return max_val
+
+
 def checkSequences(s : str):
     hold = list(string.printable)
     hold.remove("A")
@@ -139,7 +165,8 @@ if __name__ == "__main__":
         "LongestCommonSubstring": LongestCommonSubstring,
         "LongestCommonSubsequence": LongestCommonSubsequence,
         "EditDistance" : EditDistance,
-        "NeedleMan_Wunsch" : Needleman_Wunsch
+        "NeedleMan_Wunsch" : Needleman_Wunsch,
+        "SmithWaterman" : SmithWaterman
     }
     #This gets the dictionary of the sequences
     all_sequences_filename = input("Name of file for database of sequences (in cwd, and in FASTA format): ")
@@ -167,7 +194,7 @@ if __name__ == "__main__":
         print("What algorithm would you like to use to compute the similarities between your unknown sequence and those provided?")
         print("".join([f"{i}. {s}\n" for i,s in enumerate(similarityAlgorithms.keys())])) #This just prints the dictionary, why is this so complicated 
         algo_choice = input("Select the number corresponding to the algorithm you want to run: ")
-        listOfAlgoChoices = [str(0),str(1),str(2),str(3)]
+        listOfAlgoChoices = [str(0),str(1),str(2),str(3),str(4)]
         while(algo_choice not in listOfAlgoChoices):
             algo_choice =   input("Select the number corresponding to the algorithm you want to run: ")
         algo_choice = int(algo_choice)
@@ -223,7 +250,20 @@ if __name__ == "__main__":
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("The greatest hold for Needleman Wunsch for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("-------------------------------------------------------------\n")
+        elif(algo_choice == 4):
+            # SmithWaterman
+            curr_longest = [pow(-2,31), None]
+            for i in D:
+                hold = SmithWaterman(D[i], query_sequence)
+                print("Comparing String 1: " + i + " to String 2: Query Sequence")
+                print("Score : ", hold)
+                print("-------------------------------------------------------------\n")
+                if(hold > curr_longest[0]):
+                    curr_longest[0] = hold
+                    curr_longest[1] = i
+            print("The greatest score for SmithWaterman for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
 
         val = input("Would you like to do another operation? Type Y to repeat or N to exit: ")
