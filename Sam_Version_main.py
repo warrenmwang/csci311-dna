@@ -1,7 +1,4 @@
 import os
-import tkinter
-from tkinter import ttk
-from typing import Callable
 import numpy as np
 import string
 
@@ -111,7 +108,7 @@ def NeedleMan_Wunsch(s : str, t : str) -> int:
     
 
 def checkSequences(s : str):
-    hold = list(string.ascii_uppercase)
+    hold = list(string.printable)
     hold.remove("A")
     hold.remove("T")
     hold.remove("C")
