@@ -68,8 +68,13 @@ def Needleman_Wunsch(s : str, t : str):
 
     m = len(s)
     n = len(t)
-
+   
     d = np.zeros([m+1, n+1])
+    for i in range(n):
+        d[0][i] = d[0][i-1] + GAP_PENALTY
+    for j in range(m):
+        d[j][0] = d[j-1][0] + GAP_PENALTY
+
     for i in range(m + 1):
         for j in range(n + 1):
             maxpoint = -1 * sys.maxsize
@@ -113,7 +118,7 @@ def SmithWaterman(s : str, t : str, match = 2, mismatch = -2, gap = -1) -> int:
             dp_matrix[i,j] = max(0, diagonal_value, vertical_value, horizontal_value)
 
             max_val = max(max_val, dp_matrix[i,j])
-    return max_val
+    return int(max_val)
 
 
 def checkSequences(s : str):
@@ -198,6 +203,7 @@ if __name__ == "__main__":
         while(algo_choice not in listOfAlgoChoices):
             algo_choice =   input("Select the number corresponding to the algorithm you want to run: ")
         algo_choice = int(algo_choice)
+        #LongestCommonSubstring
         if(algo_choice == 0):
             curr_longest = [-1, None]
             for i in D:
@@ -210,8 +216,7 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
-            #LongestCommonSubstring
-            pass
+        #LongestCommonSubsequence
         elif(algo_choice == 1):
             curr_longest = [-1, None]
             for i in D:
@@ -224,7 +229,7 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
-
+        #Edit Distance
         elif(algo_choice == 2):
             curr_longest = [pow(2,31), None]
             for i in D:
@@ -237,9 +242,7 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
-#LongestCommonSubstring
-            #EditDistance
-            pass
+        #Needleman_Wunsch
         elif(algo_choice == 3):
             curr_longest = [pow(-2,31), None]
             for i in D:
@@ -252,8 +255,8 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The greatest hold for Needleman Wunsch for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
+        # Smith-Waterman
         elif(algo_choice == 4):
-            # SmithWaterman
             curr_longest = [pow(-2,31), None]
             for i in D:
                 hold = SmithWaterman(D[i], query_sequence)
