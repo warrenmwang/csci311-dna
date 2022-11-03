@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import string
-
-def LongestCommonSubstring(s : str, t : str) -> str:
+import sys 
+def LongestCommonSubstring(s : str, t : str):
     m = len(s)
     n = len(t) 
     ret_arr = np.zeros([n+1, m+1])
@@ -16,8 +16,7 @@ def LongestCommonSubstring(s : str, t : str) -> str:
                 ret_arr[i][j] = 0
     return int(result)
 
-def LongestCommonSubsequence(s : str, t : str) -> str:
-    
+def LongestCommonSubsequence(s : str, t : str):
     m = len(s) #j
     n = len(t) #i
     ret_arr = np.zeros([n+1, m+1])
@@ -36,76 +35,60 @@ def EditDistance(s : str, t : str) -> int:
     '''
     created from pseudocode found here: https://en.wikipedia.org/wiki/Levenshtein_distance
     '''
-    m = len(s)
-    n = len(t)
+    m = len(s) + 1
+    n = len(t) + 1
     
     d = [[0 for j in range(n)] for i in range(m)]
     
-    for i in range(m):
+    for i in range(1, m):
         d[i][0] = i
         
-    for j in range(n):
+    for j in range(1, n):
         d[0][j] = j
         
-    for j in range(n):
-        for i in range(m):
-            if s[i] == t[j]:
-                substitutionCost = 0
+    for j in range(1, n):
+        for i in range(1, m):
+            if s[i-1] == t[j-1]:
+                substitutioCcost = 0
             else:
                 substitutionCost = 1
-                
-            d[i][j] = min(d[i-1][j]   + 1,                # deletion
-                          d[i][j-1]   + 1,                # insertion
-                          d[i-1][j-1] + substitutionCost) # substitution
+
+            d[i][j] = min(d[i-1][j]+ 1,            # deletion
+                              d[i][j-1] + 1,                # insertion
+                              d[i-1][j-1] + substitutionCost)              # substitution
             
     return d[m-1][n-1]
 
-def NWHelper(c1,c2):
-    if c1==c2:
-        return 1
-    else:
-        return -1
-def NeedleMan_Wunsch(s : str, t : str) -> int:
-    similarity_matrix = ((1,-1,-1,-1),(-1,1,-1,-1),(-1,-1,1,-1),(-1,-1,-1,1)) #comparison matrix with the corresponding nucleotides being AGCT 
+
+def Needleman_Wunsch(s : str, t : str):
     #based on this pseudocode -> https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm
+    EQUAL = 1
+    DIFFERENT = -1
+    GAP_PENALTY = -5
+
     m = len(s)
     n = len(t)
-    gap_penalty = 1 #penalty score when we have a gap between substrings in the sequence
 
-    d = np.zeros([m, n])
-    for i in range(m):
-        d[i][0] = i * gap_penalty
-    for j in range(n):
-        d[0][j] = j * gap_penalty
-       
-    for x in range(m):
-        for y in range(n):
-            match_int = d[x-1][y-1] +  NWHelper(s[x], t[y]) #keeps track of the value for matches in the substrings
-            delete_int = d[x-1][y] + gap_penalty #delete value of the substrings
-            insert_int = d[x][j-1] + gap_penalty #insert value of the substrings
-            d[x,y] = max(match_int, delete_int, insert_int)
-    #-----------------------------------------------------------------
-    #now that matrix is complete we can work on the logic
-    A_align = ""
-    B_align = ""
-    m = m-1
-    n = n-1
-    while (m > 0 or n > 0):
-        if m > 0 and n  > 0 and (d[m][n] == d[m-1][n-1] +  NWHelper(s[m], t[n])):
-            A_align = str(m) + A_align  
-            B_align = str(n) + B_align
-            m = m - 1
-            n = n - 1
-        elif m>0 and d[m][n] == d[m-1][n] + gap_penalty:
-            A_align = str(m) + A_align
-            B_align = "-" + B_align
-            m = m - 1
-        else:
-            A_align = "-" + A_align
-            B_align = str(n) + B_align
-            n = n - n
+    d = np.zeros([m+1, n+1])
+    for i in range(m + 1):
+        for j in range(n + 1):
+            maxpoint = -1 * sys.maxsize
+            
+            if i == 0 and j == 0:
+                d[i][j] = 0
+            else: 
+                if i != 0 and j != 0:
+                    if s[i-1] == t[j-1]:
+                        matchpoint = EQUAL
+                    else:
+                        matchpoint = DIFFERENT
+                    maxpoint = max(d[i-1][j-1] + matchpoint, maxpoint)
+                if i != 0:
+                    maxpoint = max(d[i-1][j] + GAP_PENALTY, maxpoint)
+                if j != 0:
+                    maxpoint = max(d[i][j-1] + GAP_PENALTY, maxpoint)
+                d[i][j] = maxpoint
     return int(d[m][n])
-    
 
 def checkSequences(s : str):
     hold = list(string.printable)
@@ -122,6 +105,10 @@ def readDNASequences(filename : str) -> dict:
         # parse through text and create dict D, (k,v) = (name, sequence)
         lines = f.readlines()
         D = {}
+        if lines == "" or lines == []:
+            return D
+        if lines[0][0] != ">":
+            return D
         for line in lines:
             if line[0] == ">":
                 name = line[1:].strip()
@@ -152,14 +139,19 @@ if __name__ == "__main__":
         "LongestCommonSubstring": LongestCommonSubstring,
         "LongestCommonSubsequence": LongestCommonSubsequence,
         "EditDistance" : EditDistance,
-        "NeedleMan_Wunsch" : NeedleMan_Wunsch
+        "NeedleMan_Wunsch" : Needleman_Wunsch
     }
     #This gets the dictionary of the sequences
     all_sequences_filename = input("Name of file for database of sequences (in cwd, and in FASTA format): ")
-    while not os.path.exists(all_sequences_filename):
-        all_sequences_filename = input("File not found. Try again: ")
-    D = readDNASequences(all_sequences_filename)
-    #This gets the compare sequence
+    D = None
+    while D == None or D == {}:
+        while not os.path.exists(all_sequences_filename):
+            all_sequences_filename = input("File not found. Try again: ")
+        D = readDNASequences(all_sequences_filename)
+        if(D != {}):
+            break
+        all_sequences_filename = input("File not found. Try again: ")    
+    
     query_filename = input("Name of query file: ")
     query_sequence = None
     while query_sequence == None:
@@ -174,20 +166,23 @@ if __name__ == "__main__":
     while(flag == True):
         print("What algorithm would you like to use to compute the similarities between your unknown sequence and those provided?")
         print("".join([f"{i}. {s}\n" for i,s in enumerate(similarityAlgorithms.keys())])) #This just prints the dictionary, why is this so complicated 
-
-        algo_choice = int(input("Select the number: "))
-        while(algo_choice not in [0,1,2,3]):
-            algo_choice = int(input("Select the number: "))
+        algo_choice = input("Select the number corresponding to the algorithm you want to run: ")
+        listOfAlgoChoices = [str(0),str(1),str(2),str(3)]
+        while(algo_choice not in listOfAlgoChoices):
+            algo_choice =   input("Select the number corresponding to the algorithm you want to run: ")
+        algo_choice = int(algo_choice)
         if(algo_choice == 0):
             curr_longest = [-1, None]
             for i in D:
                 hold = LongestCommonSubstring(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Longest Common Substring: ", hold)
+                print("-------------------------------------------------------------\n")
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("-------------------------------------------------------------\n")
             #LongestCommonSubstring
             pass
         elif(algo_choice == 1):
@@ -196,34 +191,41 @@ if __name__ == "__main__":
                 hold = LongestCommonSubsequence(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Longest Common Subsequence: ", hold)
+                print("-------------------------------------------------------------\n")
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("-------------------------------------------------------------\n")
+
         elif(algo_choice == 2):
             curr_longest = [pow(2,31), None]
             for i in D:
                 hold = EditDistance(D[i], query_sequence)
                 print("Comparing Edit Distance for String 1: " + i + " to String 2: Query Sequence")
                 print("Edit Distance is: ", hold)
+                print("-------------------------------------------------------------\n")
                 if(hold < curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
-            #LongestCommonSubstring
+            print("-------------------------------------------------------------\n")
+#LongestCommonSubstring
             #EditDistance
             pass
         elif(algo_choice == 3):
-            curr_longest = [pow(2,31), None]
+            curr_longest = [pow(-2,31), None]
             for i in D:
-                hold = NeedleMan_Wunsch(D[i], query_sequence)
+                hold = Needleman_Wunsch(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Difference : ", hold)
-                if(hold < curr_longest[0]):
+                print("-------------------------------------------------------------\n")
+                if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
-            
+            print("-------------------------------------------------------------\n")
+
         val = input("Would you like to do another operation? Type Y to repeat or N to exit")
         print(val)
         if val.strip() == 'n' or val.strip() == 'N':
