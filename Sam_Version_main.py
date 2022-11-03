@@ -49,7 +49,7 @@ def EditDistance(s : str, t : str) -> int:
     for j in range(1, n):
         for i in range(1, m):
             if s[i-1] == t[j-1]:
-                substitutioCcost = 0
+                substitutionCost = 0
             else:
                 substitutionCost = 1
 
@@ -226,10 +226,7 @@ if __name__ == "__main__":
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print("-------------------------------------------------------------\n")
 
-        val = input("Would you like to do another operation? Type Y to repeat or N to exit")
+        val = input("Would you like to do another operation? Type Y to repeat or N to exit: ")
         print(val)
         if val.strip() == 'n' or val.strip() == 'N':
             break
-
-
-    
