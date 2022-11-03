@@ -1,23 +1,9 @@
 import os
+import tkinter
+from tkinter import ttk
 from typing import Callable
 import numpy as np
 import string
-import sys
-def FindMostSimilarSeq(t : str, D : dict, algo : Callable) -> tuple[str, int]:
-    bestSim = -10e-10
-    bestSeq = ""
-    for i in range(len(D)):
-        sim = ComputeSimilarity(t, D[i], algo)
-        if sim > bestSim:
-            bestSim = sim
-            bestSeq = D[i]
-    return bestSeq, bestSim
-
-def ComputeSimilarity(t : str, s : str, algo : Callable) -> int:
-    # Compute the similarity between t and s
-    # using the function passed in as algo
-    # TODO
-    pass
 
 def LongestCommonSubstring(s : str, t : str) -> str:
     m = len(s)
@@ -32,7 +18,6 @@ def LongestCommonSubstring(s : str, t : str) -> str:
             else:
                 ret_arr[i][j] = 0
     return int(result)
-
 
 def LongestCommonSubsequence(s : str, t : str) -> str:
     
@@ -78,9 +63,53 @@ def EditDistance(s : str, t : str) -> int:
             
     return d[m-1][n-1]
 
+def NWHelper(c1,c2):
+    if c1==c2:
+        return 1
+    else:
+        return -1
 def NeedleMan_Wunsch(s : str, t : str) -> int:
-    # TODO
-    pass
+    similarity_matrix = ((1,-1,-1,-1),(-1,1,-1,-1),(-1,-1,1,-1),(-1,-1,-1,1)) #comparison matrix with the corresponding nucleotides being AGCT 
+    #based on this pseudocode -> https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm
+    m = len(s)
+    n = len(t)
+    gap_penalty = 1 #penalty score when we have a gap between substrings in the sequence
+
+    d = np.zeros([m, n])
+    for i in range(m):
+        d[i][0] = i * gap_penalty
+    for j in range(n):
+        d[0][j] = j * gap_penalty
+       
+    for x in range(m):
+        for y in range(n):
+            match_int = d[x-1][y-1] +  NWHelper(s[x], t[y]) #keeps track of the value for matches in the substrings
+            delete_int = d[x-1][y] + gap_penalty #delete value of the substrings
+            insert_int = d[x][j-1] + gap_penalty #insert value of the substrings
+            d[x,y] = max(match_int, delete_int, insert_int)
+    #-----------------------------------------------------------------
+    #now that matrix is complete we can work on the logic
+    A_align = ""
+    B_align = ""
+    m = m-1
+    n = n-1
+    while (m > 0 or n > 0):
+        if m > 0 and n  > 0 and (d[m][n] == d[m-1][n-1] +  NWHelper(s[m], t[n])):
+            A_align = str(m) + A_align  
+            B_align = str(n) + B_align
+            m = m - 1
+            n = n - 1
+        elif m>0 and d[m][n] == d[m-1][n] + gap_penalty:
+            A_align = str(m) + A_align
+            B_align = "-" + B_align
+            m = m - 1
+        else:
+            A_align = "-" + A_align
+            B_align = str(n) + B_align
+            n = n - n
+    return int(d[m][n])
+    
+
 def checkSequences(s : str):
     hold = list(string.ascii_uppercase)
     hold.remove("A")
@@ -111,13 +140,15 @@ def readDNASequences(filename : str) -> dict:
 def readQuerySequence(filename : str) -> str:
     with open(filename, "r") as f:
         query = f.read()
+        if(query == ""):
+            return None
         query = query.replace("\n", "") # remove newlines
         query.upper()
         if(checkSequences(query)):
             return query
         else:
             print("The provided query contained invalid characters")
-            return 
+            return None
 
 if __name__ == "__main__":
     similarityAlgorithms = {
@@ -133,16 +164,19 @@ if __name__ == "__main__":
     D = readDNASequences(all_sequences_filename)
     #This gets the compare sequence
     query_filename = input("Name of query file: ")
-    while not os.path.exists(query_filename):
-        query_filename = input("File not found. Try again: ")
-    query_sequence = readQuerySequence(query_filename)
-    
+    query_sequence = None
+    while query_sequence == None:
+        while not os.path.exists(query_filename):
+            query_filename = input("File not found. Try again: ")
+        query_sequence = readQuerySequence(query_filename)
+        if(query_sequence != None):
+            break
+        query_filename= input("Provide a file with a valid query sequence:")
+        
     flag = True
     while(flag == True):
         print("What algorithm would you like to use to compute the similarities between your unknown sequence and those provided?")
         print("".join([f"{i}. {s}\n" for i,s in enumerate(similarityAlgorithms.keys())])) #This just prints the dictionary, why is this so complicated 
-
-
 
         algo_choice = int(input("Select the number: "))
         while(algo_choice not in [0,1,2,3]):
@@ -175,9 +209,7 @@ if __name__ == "__main__":
                 hold = EditDistance(D[i], query_sequence)
                 print("Comparing Edit Distance for String 1: " + i + " to String 2: Query Sequence")
                 print("Edit Distance is: ", hold)
-                print(curr_longest[0])
                 if(hold < curr_longest[0]):
-                    
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
@@ -185,14 +217,20 @@ if __name__ == "__main__":
             #EditDistance
             pass
         elif(algo_choice == 3):
-            #NeedleMan_Wunsch
-            pass
+            curr_longest = [pow(2,31), None]
+            for i in D:
+                hold = NeedleMan_Wunsch(D[i], query_sequence)
+                print("Comparing String 1: " + i + " to String 2: Query Sequence")
+                print("Difference : ", hold)
+                if(hold < curr_longest[0]):
+                    curr_longest[0] = hold
+                    curr_longest[1] = i
+            print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            
         val = input("Would you like to do another operation? Type Y to repeat or N to exit")
         print(val)
         if val.strip() == 'n' or val.strip() == 'N':
             break
-   
+
+
     
-    #compute the most similar sequence to query
-    #mostSimSeq, sim = FindMostSimilarSeq(query_sequence, D, algo)
-    #print(f"The most similar sequence is: {mostSimSeq}\nSimilarity: {sim}")    
