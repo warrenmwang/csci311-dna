@@ -2,6 +2,8 @@ import os
 import numpy as np
 import string
 import sys 
+
+
 def LongestCommonSubstring(s : str, t : str):
     m = len(s)
     n = len(t) 
@@ -127,6 +129,10 @@ def checkSequences(s : str):
     hold.remove("T")
     hold.remove("C")
     hold.remove("G")
+    hold.remove("a")
+    hold.remove("t")
+    hold.remove("c")
+    hold.remove("g")
     if any(x in s for x in hold):
         return False
     else:
@@ -155,10 +161,10 @@ def readDNASequences(filename : str) -> dict:
 def readQuerySequence(filename : str) -> str:
     with open(filename, "r") as f:
         query = f.read()
+        query = query.upper()
         if(query == ""):
             return None
         query = query.replace("\n", "") # remove newlines
-        query.upper()
         if(checkSequences(query)):
             return query
         else:
@@ -166,6 +172,7 @@ def readQuerySequence(filename : str) -> str:
             return None
 
 if __name__ == "__main__":
+    LINEBREAK = "-------------------------------------------------------------\n"
     similarityAlgorithms = {
         "LongestCommonSubstring": LongestCommonSubstring,
         "LongestCommonSubsequence": LongestCommonSubsequence,
@@ -210,12 +217,12 @@ if __name__ == "__main__":
                 hold = LongestCommonSubstring(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Longest Common Substring: ", hold)
-                print("-------------------------------------------------------------\n")
+                print(LINEBREAK)
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
-            print("-------------------------------------------------------------\n")
+            print(LINEBREAK)
         #LongestCommonSubsequence
         elif(algo_choice == 1):
             curr_longest = [-1, None]
@@ -223,12 +230,12 @@ if __name__ == "__main__":
                 hold = LongestCommonSubsequence(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Longest Common Subsequence: ", hold)
-                print("-------------------------------------------------------------\n")
+                print(LINEBREAK)
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
-            print("-------------------------------------------------------------\n")
+            print(LINEBREAK)
         #Edit Distance
         elif(algo_choice == 2):
             curr_longest = [pow(2,31), None]
@@ -236,12 +243,12 @@ if __name__ == "__main__":
                 hold = EditDistance(D[i], query_sequence)
                 print("Comparing Edit Distance for String 1: " + i + " to String 2: Query Sequence")
                 print("Edit Distance is: ", hold)
-                print("-------------------------------------------------------------\n")
+                print(LINEBREAK)
                 if(hold < curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
-            print("-------------------------------------------------------------\n")
+            print(LINEBREAK)
         #Needleman_Wunsch
         elif(algo_choice == 3):
             curr_longest = [pow(-2,31), None]
@@ -249,12 +256,12 @@ if __name__ == "__main__":
                 hold = Needleman_Wunsch(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Difference : ", hold)
-                print("-------------------------------------------------------------\n")
+                print(LINEBREAK)
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The greatest hold for Needleman Wunsch for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
-            print("-------------------------------------------------------------\n")
+            print("The greatest score for Needleman Wunsch for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print(LINEBREAK)
         # Smith-Waterman
         elif(algo_choice == 4):
             curr_longest = [pow(-2,31), None]
@@ -262,14 +269,14 @@ if __name__ == "__main__":
                 hold = SmithWaterman(D[i], query_sequence)
                 print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Score : ", hold)
-                print("-------------------------------------------------------------\n")
+                print(LINEBREAK)
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
             print("The greatest score for SmithWaterman for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
-            print("-------------------------------------------------------------\n")
+            print(LINEBREAK)
 
         val = input("Would you like to do another operation? Type Y to repeat or N to exit: ")
-        print(val)
+        print(LINEBREAK)
         if val.strip() == 'n' or val.strip() == 'N':
             break
