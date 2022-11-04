@@ -217,7 +217,7 @@ if __name__ == "__main__":
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("The best match using longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print(LINEBREAK)
         # LongestCommonSubsequence
         elif(algo_choice == 1):
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("The best match using longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print(LINEBREAK)
         # Edit Distance
         elif(algo_choice == 2):
@@ -243,7 +243,7 @@ if __name__ == "__main__":
                 if(hold < curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
+            print("The best match using edit distance for the query sequence was: " + curr_longest[1] + " with the lowest number of ", curr_longest[0], "edits")
             print(LINEBREAK)
         # Needleman-Wunsch
         elif(algo_choice == 3):
@@ -256,7 +256,7 @@ if __name__ == "__main__":
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The greatest score for Needleman Wunsch for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("The best match using Needleman-Wunsch for the query sequence was: " + curr_longest[1] + " with the best score of ", curr_longest[0])
             print(LINEBREAK)
         # Smith-Waterman
         elif(algo_choice == 4):
@@ -269,7 +269,7 @@ if __name__ == "__main__":
                 if(hold > curr_longest[0]):
                     curr_longest[0] = hold
                     curr_longest[1] = i
-            print("The greatest score for SmithWaterman for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
+            print("The best match using Smith-Waterman for the query sequence was: " + curr_longest[1] + " with the best score of ", curr_longest[0])
             print(LINEBREAK)
 
         val = input("Would you like to do another operation? Type Y to repeat or N to exit: ")
