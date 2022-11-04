@@ -63,7 +63,7 @@ def EditDistance(s : str, t : str) -> int:
 
 
 def Needleman_Wunsch(s : str, t : str):
-    #based on this pseudocode -> https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm
+    # based on this pseudocode -> https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm
     EQUAL = 1
     DIFFERENT = -1
     GAP_PENALTY = -5
@@ -116,7 +116,7 @@ def SmithWaterman(s : str, t : str, match = 2, mismatch = -2, gap = -1) -> int:
             else:
                 diagonal_value = dp_matrix[i-1,j-1] + mismatch    
 
-            #if score is negative, replace it with a zero.     
+            # if score is negative, replace it with a zero.     
             dp_matrix[i,j] = max(0, diagonal_value, vertical_value, horizontal_value)
 
             max_val = max(max_val, dp_matrix[i,j])
@@ -137,6 +137,7 @@ def checkSequences(s : str):
         return False
     else:
         return True
+
 def readDNASequences(filename : str) -> dict:
     with open(filename, "r") as f:
         # parse through text and create dict D, (k,v) = (name, sequence)
@@ -173,14 +174,9 @@ def readQuerySequence(filename : str) -> str:
 
 if __name__ == "__main__":
     LINEBREAK = "-------------------------------------------------------------\n"
-    similarityAlgorithms = {
-        "LongestCommonSubstring": LongestCommonSubstring,
-        "LongestCommonSubsequence": LongestCommonSubsequence,
-        "EditDistance" : EditDistance,
-        "NeedleMan_Wunsch" : Needleman_Wunsch,
-        "SmithWaterman" : SmithWaterman
-    }
-    #This gets the dictionary of the sequences
+    similarityAlgorithms = ["LongestCommonSubstring","LongestCommonSubsequence","EditDistance","NeedleMan_Wunsch","SmithWaterman"]
+    
+    # user inputs sequences and query file
     all_sequences_filename = input("Name of file for database of sequences (in cwd, and in FASTA format): ")
     D = None
     while D == None or D == {}:
@@ -200,17 +196,17 @@ if __name__ == "__main__":
         if(query_sequence != None):
             break
         query_filename= input("Provide a file with a valid query sequence: ")
-        
-    flag = True
-    while(flag == True):
+    
+    # user selects algo to run on input
+    while(True):
         print("What algorithm would you like to use to compute the similarities between your unknown sequence and those provided?")
-        print("".join([f"{i}. {s}\n" for i,s in enumerate(similarityAlgorithms.keys())])) #This just prints the dictionary, why is this so complicated 
+        print("".join([f"{i}. {s}\n" for i,s in enumerate(similarityAlgorithms)]))
         algo_choice = input("Select the number corresponding to the algorithm you want to run: ")
-        listOfAlgoChoices = [str(0),str(1),str(2),str(3),str(4)]
+        listOfAlgoChoices = [str(i) for i in range(len(similarityAlgorithms))]
         while(algo_choice not in listOfAlgoChoices):
             algo_choice =   input("Select the number corresponding to the algorithm you want to run: ")
         algo_choice = int(algo_choice)
-        #LongestCommonSubstring
+        # LongestCommonSubstring
         if(algo_choice == 0):
             curr_longest = [-1, None]
             for i in D:
@@ -223,7 +219,7 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The longest common substring for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print(LINEBREAK)
-        #LongestCommonSubsequence
+        # LongestCommonSubsequence
         elif(algo_choice == 1):
             curr_longest = [-1, None]
             for i in D:
@@ -236,12 +232,12 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The longest common sequence for the query sequence was: " + curr_longest[1] + " at a total of ", curr_longest[0], "characters")
             print(LINEBREAK)
-        #Edit Distance
+        # Edit Distance
         elif(algo_choice == 2):
             curr_longest = [pow(2,31), None]
             for i in D:
                 hold = EditDistance(D[i], query_sequence)
-                print("Comparing Edit Distance for String 1: " + i + " to String 2: Query Sequence")
+                print("Comparing String 1: " + i + " to String 2: Query Sequence")
                 print("Edit Distance is: ", hold)
                 print(LINEBREAK)
                 if(hold < curr_longest[0]):
@@ -249,7 +245,7 @@ if __name__ == "__main__":
                     curr_longest[1] = i
             print("The lowest edit distance for the query sequence was: " + curr_longest[1] + " at a total of", curr_longest[0], "characters")
             print(LINEBREAK)
-        #Needleman_Wunsch
+        # Needleman-Wunsch
         elif(algo_choice == 3):
             curr_longest = [pow(-2,31), None]
             for i in D:
